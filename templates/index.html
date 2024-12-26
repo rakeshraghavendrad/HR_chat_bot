@@ -114,7 +114,7 @@
                 // Convert **text** to <b>text</b>
                 let formattedResponse = data.response_text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 
-                // Add blank line after each section header (e.g., after "Bereavement Leave", "Education Leave", etc.)
+                // Add blank line after each section header
                 formattedResponse = formattedResponse.replace(/(Bereavement Leave|Education Leave|Vacation Leave):/g, '$1:<br><br>');
 
                 // Convert * text to bullet points
@@ -130,9 +130,9 @@
                         let tableHTML = '<table>';
                         rows.forEach((row, index) => {
                             const cells = row.split("|").filter(cell => cell.trim() !== "");
-                            if (index === 0 || row.includes("---")) {
+                            if (index === 0) {
                                 tableHTML += '<tr>' + cells.map(cell => `<th>${cell.trim()}</th>`).join('') + '</tr>';
-                            } else {
+                            } else if (!row.includes("---")) {
                                 tableHTML += '<tr>' + cells.map(cell => `<td>${cell.trim()}</td>`).join('') + '</tr>';
                             }
                         });
