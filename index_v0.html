@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask Syra</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background-color: #007BFF;
+            color: #fff;
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+        }
+        textarea {
+            width: 100%;
+            max-width: 800px;
+            height: 120px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            width: 100%;
+            max-width: 800px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            flex-grow: 1;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        b {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>Ask Syra</header>
+    <div class="container">
+        <textarea id="query" placeholder="Type your question here..."></textarea>
+        <button onclick="askQuestion()">Ask</button>
+        <div class="response" id="response"></div>
+    </div>
+
+    <script>
+        async function askQuestion() {
+            const query = document.getElementById('query').value;
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = "<p>Loading...</p>";
+
+            const response = await fetch('/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ question: query }),
+            });
+
+            const data = await response.json();
+            if (data.response_text) {
+                // Convert **text** to <b>text</b>
+                let formattedResponse = data.response_text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
+                // Add blank line after each section header
+                formattedResponse = formattedResponse.replace(/(Bereavement Leave|Education Leave|Vacation Leave):/g, '$1:<br><br>');
+
+                // Convert * text to bullet points
+                formattedResponse = formattedResponse.replace(/\* ([^*]+)/g, '<ul><li>$1</li></ul>');
+
+                // Convert pipe-separated table to HTML table
+                const tableRegex = /\|[^|]+\|([^|]+\|)+/g;
+                const matches = formattedResponse.match(tableRegex);
+
+                if (matches) {
+                    matches.forEach(table => {
+                        const rows = table.trim().split("\n");
+                        let tableHTML = '<table>';
+                        rows.forEach((row, index) => {
+                            const cells = row.split("|").filter(cell => cell.trim() !== "");
+                            if (index === 0) {
+                                tableHTML += '<tr>' + cells.map(cell => `<th>${cell.trim()}</th>`).join('') + '</tr>';
+                            } else if (!row.includes("---")) {
+                                tableHTML += '<tr>' + cells.map(cell => `<td>${cell.trim()}</td>`).join('') + '</tr>';
+                            }
+                        });
+                        tableHTML += '</table>';
+                        formattedResponse = formattedResponse.replace(table, tableHTML);
+                    });
+                }
+
+                responseDiv.innerHTML = formattedResponse;
+            } else {
+                responseDiv.innerHTML = '<p>No response received.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
