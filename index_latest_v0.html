@@ -366,6 +366,9 @@
                         });
                     }
 
+                    // Format text into bullet points
+                    formattedResponse = formattedResponse.replace(/(\d+\.\s)(.*?)(\n|$)/g, '<strong>$1</strong>$2<br>');
+
                     responseDiv.innerHTML = formattedResponse;
                 }
 
