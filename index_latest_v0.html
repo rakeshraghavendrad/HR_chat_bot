@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Assistant</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background-color: #f5f7fa;
+            --text-color: #333;
+            --border-color: #e2e8f0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .header-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            flex: 1;
+        }
+
+        .chat-interface {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .button-container {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+
+        .response {
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .flowchart-container {
+            position: relative;
+            margin-top: 2rem;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .flowchart-container img {
+            max-width: 100%;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            z-index: 10;
+        }
+
+        .zoom-btn {
+            padding: 0.5rem;
+            min-width: 40px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            color: var(--text-color);
+            font-style: italic;
+        }
+
+        .loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #e74c3c;
+            padding: 1rem;
+            background: #fde8e8;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                margin: 1rem;
+            }
+
+            .header-title {
+                font-size: 2rem;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="header-title">SYRA</h1>
+    </header>
+
+    <div class="container">
+        <div class="chat-interface">
+            <div class="input-section">
+                <textarea 
+                    id="query" 
+                    placeholder="Ask me anything about HR processes, policies, or request a flowchart..."
+                    aria-label="Question input"
+                ></textarea>
+                <div class="button-container">
+                    <button onclick="askQuestion()" id="submit-button">
+                        <span>Ask Question</span>
+                    </button>
+                    <button onclick="clearChat()" id="clear-button">
+                        <span>Clear Chat</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="response-section">
+                <div class="response" id="response"></div>
+                <div class="flowchart-container" id="flowchart-container" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentZoom = 1;
+        const MIN_ZOOM = 0.5;
+        const MAX_ZOOM = 2;
+
+        function addZoomControls(container) {
+            const controls = document.createElement('div');
+            controls.className = 'zoom-controls';
+            controls.innerHTML = `
+                <button class="zoom-btn" onclick="zoomFlowchart(0.1)" title="Zoom In">+</button>
+                <button class="zoom-btn" onclick="zoomFlowchart(-0.1)" title="Zoom Out">-</button>
+                <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">↺</button>
+            `;
+            container.appendChild(controls);
+        }
+
+        function zoomFlowchart(delta) {
+            const img = document.querySelector('.flowchart-container img');
+            if (img) {
+                currentZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, currentZoom + delta));
+                img.style.transform = `scale(${currentZoom})`;
+            }
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            const img = document.querySelector('.flowchart-container img');
+            if (img) {
+                img.style.transform = 'scale(1)';
+            }
+        }
+
+        function clearChat() {
+            document.getElementById('query').value = '';
+            document.getElementById('response').innerHTML = '';
+            document.getElementById('flowchart-container').style.display = 'none';
+        }
+
+        async function askQuestion() {
+            const query = document.getElementById('query').value.trim();
+            const responseDiv = document.getElementById('response');
+            const flowchartContainer = document.getElementById('flowchart-container');
+            const submitButton = document.getElementById('submit-button');
+
+            if (!query) {
+                responseDiv.innerHTML = '<div class="error-message">Please enter a question.</div>';
+                return;
+            }
+
+            submitButton.disabled = true;
+            responseDiv.innerHTML = '<div class="loading">Processing your question...</div>';
+            flowchartContainer.style.display = 'flex';
+            flowchartContainer.innerHTML = '<div class="loading">Generating response...</div>';
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: query }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.response_text) {
+                    let formattedResponse = data.response_text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+                    // Convert pipe-separated table to HTML table
+                    const tableRegex = /\|[^|]+\|([^|]+\|)+/g;
+                    const matches = formattedResponse.match(tableRegex);
+
+                    if (matches) {
+                        matches.forEach(table => {
+                            const rows = table.trim().split("\n");
+                            let tableHTML = '<table>';
+                            rows.forEach((row, index) => {
+                                const cells = row.split("|").filter(cell => cell.trim() !== "");
+                                if (index === 0) {
+                                    tableHTML += '<tr>' + cells.map(cell => `<th>${cell.trim()}</th>`).join('') + '</tr>';
+                                } else if (!row.includes("---")) {
+                                    tableHTML += '<tr>' + cells.map(cell => `<td>${cell.trim()}</td>`).join('') + '</tr>';
+                                }
+                            });
+                            tableHTML += '</table>';
+                            formattedResponse = formattedResponse.replace(table, tableHTML);
+                        });
+                    }
+
+                    responseDiv.innerHTML = formattedResponse;
+                }
+
+                if (data.flowchart_path) {
+                    const img = new Image();
+                    img.src = data.flowchart_path + '?t=' + new Date().getTime();
+                    img.alt = 'Process Flowchart';
+                    img.style.transition = 'transform 0.3s ease';
+
+                    img.onerror = () => {
+                        flowchartContainer.innerHTML = '<div class="error-message">Failed to load flowchart.</div>';
+                    };
+
+                    img.onload = () => {
+                        flowchartContainer.innerHTML = '';
+                        flowchartContainer.appendChild(img);
+                        addZoomControls(flowchartContainer);
+                        flowchartContainer.style.display = 'flex';
+                    };
+                } else {
+                    flowchartContainer.style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                responseDiv.innerHTML = `<div class="error-message">An error occurred: ${error.message}</div>`;
+                flowchartContainer.style.display = 'none';
+            } finally {
+                submitButton.disabled = false;
+            }
+        }
+
+        document.getElementById('query').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                askQuestion();
+            }
+        });
+    </script>
+</body>
+</html>
